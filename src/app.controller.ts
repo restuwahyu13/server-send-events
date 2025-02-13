@@ -12,7 +12,7 @@ export class AppController {
   }
 
   @Get('/notification')
-  pushNotiication(@Res() res: Response): void {
-    this.appService.pushNotiication(res);
+  async pushNotiication(@Res() res: Response): Promise<void> {
+    await this.appService.pushNotiication(res);
   }
 }

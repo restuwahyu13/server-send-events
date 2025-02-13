@@ -6,31 +6,36 @@ import { RedisService } from 'src/libs/lib.redis';
 export class ServerSendEvents {
   constructor(private readonly redisService: RedisService) {}
 
-  subscribe(res: Response, event: string): void {
-    res.writeHead(200, {
-      accept: 'text/event-stream',
-      connection: 'keep-alive',
-      'content-type': 'text/event-stream',
-      'cache-control': 'no-cache',
-    });
+  async subscribe(res: Response, event: string): Promise<void> {
+    res
+      .setMaxListeners(0)
+      .writeHead(200, {
+        accept: 'text/event-stream',
+        connection: 'keep-alive',
+        'content-type': 'text/event-stream',
+        'cache-control': 'no-cache',
+      })
+      .flushHeaders();
 
-    res.flushHeaders();
-
-    this.redisService.subscribe(event, (result: any) => {
+    const result = await this.redisService.subscribe(event);
+    if (result) {
       const content: string = `event: ${event}\ndata: ${result}\n\n`;
-
       res.cork();
       res.write(content);
-      process.nextTick(() => {
-        res.uncork();
-        res.socket.unref();
-      });
-    });
+      process.nextTick(() => res.uncork());
+    }
 
-    res.on('close', () => {
-      res.socket.destroy();
-      res.end();
-    });
+    res
+      .on('error', () => {
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('close', () => {
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      });
   }
 
   publish(event: string, message: any) {

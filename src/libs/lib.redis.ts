@@ -15,12 +15,14 @@ export class RedisService {
     return this.predis.publish(channel, JSON.stringify({ data: message }));
   }
 
-  subscribe(channel: string, callback: Callback<any>) {
-    this.sredis.on('message', (ch: string, message: any) => {
-      if (ch === channel) {
-        callback(message);
-      }
+  subscribe(channel: string) {
+    return new Promise((resolve, _reject) => {
+      this.sredis.on('message', (ch: string, message: any) => {
+        if (ch === channel) {
+          resolve(message);
+        }
+      });
+      this.sredis.subscribe(channel);
     });
-    this.sredis.subscribe(channel);
   }
 }
