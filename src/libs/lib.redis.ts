@@ -9,8 +9,8 @@ export class RedisService {
   private sredis: Redis;
 
   constructor() {
-    this.predis = new Redis({ enableAutoPipelining: true });
-    this.sredis = new Redis({ enableAutoPipelining: true });
+    this.predis = new Redis({ enableAutoPipelining: true, autoResubscribe: false });
+    this.sredis = new Redis({ enableAutoPipelining: true, autoResubscribe: false });
   }
 
   publish(channel: string, message: any) {
