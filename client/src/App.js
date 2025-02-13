@@ -1,40 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { createParser } from 'eventsource-parser';
 import { ToastContainer, toast, Slide } from 'react-toastify';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 function App() {
+  const url = 'http://localhost:4000/notification';
   const [notification, setNotification] = useState(undefined);
-
-  function onEvent(event) {
-    const data = JSON.parse(event.data);
-    if (data) {
-      setNotification(data);
-    }
-  }
-
-  const fetchStream = async () => {
-    const url = 'http://localhost:4000/notification';
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'text/event-stream',
-        Authorization: 'Bearer abc123',
-      },
-    });
-
-    const parser = createParser({ onEvent });
-    const textDecoderStream = new TextDecoderStream();
-    const reader = response.body.pipeThrough(textDecoderStream).getReader();
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      parser.feed(value);
-    }
-  };
-
-  useEffect(() => {
-    fetchStream();
-  }, []);
 
   if (notification) {
     toast.success('Received notfication from server', {
@@ -51,6 +21,76 @@ function App() {
 
     setNotification(undefined);
   }
+
+  function onEvent(event) {
+    const data = JSON.parse(event.data);
+    console.log('[DEBUG]', data);
+    if (data) {
+      setNotification(data);
+    }
+  }
+
+  // function onError(err) {
+  //   console.error('SSE event error', err);
+  // }
+
+  // const fetchStream = async () => {
+  //   const response = await fetch(url, {
+  //     headers: {
+  //       accept: 'text/event-stream',
+  //       'content-type': 'text/event-stream',
+  //       authorization: 'Bearer abc123',
+  //     },
+  //   });
+
+  //   const parser = createParser({ onEvent, onError });
+  //   const textDecoderStream = new TextDecoderStream();
+  //   const reader = response.body.pipeThrough(textDecoderStream).getReader();
+
+  //   const { value, done } = await reader.read();
+  //   if (done) parser.reset();
+  //   parser.feed(value);
+  // };
+
+  const eventStream = () => {
+    const eventSource = new EventSource(url);
+    eventSource.addEventListener('notification', (event) => {
+      onEvent(event);
+    });
+
+    eventSource.onerror = (err) => {
+      console.error('SSE event error', err);
+    };
+
+    return eventSource;
+  };
+
+  const fetchSourceStream = () => {
+    fetchEventSource(url, {
+      method: 'POST',
+      headers: {
+        accept: 'text/event-stream',
+        'content-type': 'text/event-stream',
+        authorization: 'Bearer abc123',
+      },
+      keepalive: true,
+      onmessage(event) {
+        onEvent(event);
+      },
+      onerror(err) {
+        console.error('SSE event error', err);
+      },
+    });
+  };
+
+  useEffect(() => {
+    // fetchStream();
+    fetchSourceStream();
+    // const event = eventStream();
+    // return () => {
+    //   event.close();
+    // };
+  }, []);
 
   return (
     <>
@@ -76,12 +116,9 @@ function App() {
           wordBreak: 'break-word',
         }}
       >
-        <strong>Server-Sent Events (SSE)</strong> adalah teknologi di JavaScript
-        yang memungkinkan server untuk mengirim pembaruan ke klien (biasanya
-        browser) secara satu arah (unidirectional) melalui koneksi HTTP yang
-        persisten. Ini berguna ketika Anda ingin server secara otomatis mengirim
-        data ke klien tanpa klien perlu terus-menerus meminta (polling) data
-        tersebut.
+        <strong>Server-Sent Events (SSE)</strong> adalah teknologi di JavaScript yang memungkinkan server untuk mengirim pembaruan ke klien (biasanya
+        browser) secara satu arah (unidirectional) melalui koneksi HTTP yang persisten. Ini berguna ketika Anda ingin server secara otomatis mengirim
+        data ke klien tanpa klien perlu terus-menerus meminta (polling) data tersebut.
       </p>
     </>
   );

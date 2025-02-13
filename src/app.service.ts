@@ -7,11 +7,12 @@ import { Response } from 'express';
 export class AppService {
   constructor(private readonly sseService: ServerSendEvents) {}
 
-  send(): Promise<number> {
-    return this.sseService.publish('text', { message: 'Hello World!' });
+  async send(): Promise<Record<string, any>> {
+    const pub: number = await this.sseService.publish('notification', { message: 'Hello World!' });
+    return { message: pub > 0 ? 'SSE send message success' : 'SSE send message failed' };
   }
 
   pushNotiication(res: Response): void {
-    this.sseService.subscribe(res, 'text');
+    this.sseService.subscribe(res, 'notification');
   }
 }
