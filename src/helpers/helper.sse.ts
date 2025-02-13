@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
+import { randomUUID } from 'node:crypto';
 import { RedisService } from 'src/libs/lib.redis';
 
 @Injectable()
@@ -8,7 +9,80 @@ export class ServerSendEvents {
 
   constructor(private readonly redisService: RedisService) {}
 
-  async subscribe(res: Response, event: string): Promise<void> {
+  private events(res: Response): void {
+    res
+      .on('error', (err?: Error) => {
+        this.logger.error('SSE error', err);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('close', (args: any) => {
+        this.logger.log('SSE close', args);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('finish', (args: any) => {
+        this.logger.log('SSE finished', args);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      });
+
+    process
+      .on('uncaughtException', (err: Error) => {
+        this.logger.log('SSE uncaughtException', err);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('uncaughtExceptionMonitor', (err: Error) => {
+        this.logger.log('SSE uncaughtExceptionMonitor', err);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('unhandledRejection', (err: Error) => {
+        this.logger.log('SSE unhandledRejection', err);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      })
+      .on('rejectionHandled', (err: Error) => {
+        this.logger.log('SSE rejectionHandled', err);
+
+        res.socket.unref();
+        res.socket.destroy();
+        res.removeAllListeners().end();
+      });
+  }
+
+  send(res: Response, event: string, message: any): void {
+    const headers = new Headers({
+      accept: 'text/event-stream',
+      'content-type': 'text/event-stream',
+      'cache-control': 'no-cache',
+    });
+    res.setMaxListeners(0).setHeaders(headers).flushHeaders();
+
+    const uuid: string = randomUUID();
+    const content: string = `id: ${uuid}\nevent: ${event}\ndata: ${JSON.stringify({ data: message })}\n\n`;
+
+    res.cork();
+    res.write(content);
+    process.nextTick(() => res.uncork());
+
+    this.events(res);
+  }
+
+  subscribe(res: Response, event: string): void {
     const headers = new Headers({
       accept: 'text/event-stream',
       'content-type': 'text/event-stream',
@@ -17,9 +91,11 @@ export class ServerSendEvents {
 
     res.setMaxListeners(0).setHeaders(headers).flushHeaders();
 
-    this.redisService.subscribe(event, (result) => {
-      if (result) {
-        const content: string = `event: ${event}\ndata: ${result}\n\n`;
+    this.redisService.subscribe(event, (message: any) => {
+      if (message) {
+        const uuid: string = randomUUID();
+        const content: string = `id: ${uuid}\nevent: ${event}\ndata: ${JSON.stringify({ data: message })}\n\n`;
+
         res.cork();
         res.write(content);
         process.nextTick(() => res.uncork());
@@ -28,76 +104,10 @@ export class ServerSendEvents {
       }
     });
 
-    res
-      .on('error', (e) => {
-        this.logger.error('SSE error', e);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      })
-      .on('close', (result) => {
-        this.logger.log('SSE close', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      })
-      .on('finish', (result) => {
-        this.logger.log('SSE finished', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      });
-
-    process
-      .on('uncaughtException', (result) => {
-        this.logger.log('SSE uncaughtException', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      })
-      .on('uncaughtExceptionMonitor', (result) => {
-        this.logger.log('SSE uncaughtExceptionMonitor', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      })
-      .on('unhandledRejection', (result) => {
-        this.logger.log('SSE unhandledRejection', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      })
-      .on('rejectionHandled', (result) => {
-        this.logger.log('SSE rejectionHandled', result);
-
-        res.socket.unref();
-        res.socket.destroy();
-        res.removeAllListeners().end();
-      });
+    this.events(res);
   }
 
-  publish(event: string, message: any) {
+  publish(event: string, message: any): Promise<number> {
     return this.redisService.publish(event, message);
-  }
-
-  send(res: Response, event: string, message: any): void {
-    res.writeHead(200, {
-      accept: 'text/event-stream',
-      connection: 'keep-alive',
-      'content-type': 'text/event-stream',
-      'cache-control': 'no-cache',
-    });
-    res.flushHeaders();
-
-    const content: string = `event: ${event}\ndata: ${JSON.stringify({ data: message })}\n\n`;
-    res.write(content);
-
-    res.on('close', () => res.end());
   }
 }
