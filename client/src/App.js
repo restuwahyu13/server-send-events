@@ -30,48 +30,15 @@ function App() {
     }
   }
 
-  // function onError(err) {
-  //   console.error('SSE event error', err);
-  // }
-
-  // const fetchStream = async () => {
-  //   const response = await fetch(url, {
-  //     headers: {
-  //       accept: 'text/event-stream',
-  //       'content-type': 'text/event-stream',
-  //       authorization: 'Bearer abc123',
-  //     },
-  //   });
-
-  //   const parser = createParser({ onEvent, onError });
-  //   const textDecoderStream = new TextDecoderStream();
-  //   const reader = response.body.pipeThrough(textDecoderStream).getReader();
-
-  //   const { value, done } = await reader.read();
-  //   if (done) parser.reset();
-  //   parser.feed(value);
-  // };
-
-  const eventStream = () => {
-    const eventSource = new EventSource(url);
-    eventSource.addEventListener('notification', (event) => {
-      onEvent(event);
-    });
-
-    eventSource.onerror = (err) => {
-      console.error('SSE event error', err);
-    };
-
-    return eventSource;
-  };
-
   const fetchSourceStream = () => {
     fetchEventSource(url, {
       method: 'POST',
       headers: {
-        accept: 'text/event-stream',
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'POST',
         'content-type': 'text/event-stream',
-        authorization: 'Bearer abc123',
+        'cache-control': 'no-cache',
+        accept: 'text/event-stream',
       },
       keepalive: true,
       onmessage(event) {
@@ -84,12 +51,7 @@ function App() {
   };
 
   useEffect(() => {
-    // fetchStream();
     fetchSourceStream();
-    // const event = eventStream();
-    // return () => {
-    //   event.close();
-    // };
   }, []);
 
   return (
