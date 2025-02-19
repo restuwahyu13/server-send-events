@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { ToastContainer, toast, Slide } from 'react-toastify'
+import { Slide, ToastContainer, toast } from 'react-toastify'
+
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 
 function App() {
@@ -35,12 +36,10 @@ function App() {
     const accessToken = localStorage.getItem('accessToken')
     const idToken = accessToken.substring(accessToken?.length - 10, accessToken?.length)
 
-    console.log('[DEBUG MATCH TOKEN]', event.id === idToken)
+    console.log(`[DEBUG MATCH TOKEN]: ${idToken}`, event.id === idToken)
 
     if (res?.data && event.id === idToken) {
-      // const parse = JSON.parse(res?.data)
-      // setNotification(parse?.data?.message)
-      setNotification('Received from server')
+      setNotification(res?.data?.message)
     }
   }
 
@@ -141,7 +140,7 @@ function App() {
     <>
       <ToastContainer />
       <div style={{ display: 'flex', flexDirection: 'row', padding: '5px' }}>
-        {!token ? <button onClick={generateToken}>Generate Token</button> : <button onClick={transferMoney}>Send Money</button>}
+        <button onClick={generateToken}>Generate Token</button>
         <p style={{ padding: '10px' }}>Access Token: {token}</p>
       </div>
       <h1

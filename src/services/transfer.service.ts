@@ -1,9 +1,9 @@
 import { Injectable, HttpStatus as status } from '@nestjs/common'
 
+import { ApiResponse } from '~/interfaces/apiResponse.interface'
+import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
 import { TransferDTO } from '~/dtos/transfer.dto'
 import { apiResponse } from '~/helpers/helper.apiResponse'
-import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
-import { ApiResponse } from '~/interfaces/apiResponse.interface'
 import { userMocks } from '~/mocks/user.mock'
 
 @Injectable()
@@ -19,9 +19,11 @@ export class TransferService {
         throw apiResponse({ stat_code: status.UNPROCESSABLE_ENTITY, error: 'Sender or Receiver account not registered' })
       }
 
+      const amount: string = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(2000)
+
       this.serverSendEventsService.publish('notification', {
         userId: userMockReceiver.id,
-        message: `Transfer money to ${userMockReceiver.email} successfully`,
+        message: `You have received balance from ${userMockSender.email} ${amount}`,
       })
 
       return apiResponse({ stat_code: status.OK, message: `Transfer money to ${userMockReceiver.email} successfully` })
