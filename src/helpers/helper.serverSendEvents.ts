@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Response } from 'express'
-import { randomUUID } from 'node:crypto'
 
 import { RedisService } from '~/libs/lib.redis'
+import { Response } from 'express'
+import { randomUUID } from 'node:crypto'
 
 @Injectable()
 export class ServerSendEventsService {
@@ -75,7 +75,7 @@ export class ServerSendEventsService {
     this.processEvents(res)
   }
 
-  subscribe(res: Response, _user: Record<string, any>, event: string): void {
+  subscribe(res: Response, user: Record<string, any>, event: string): void {
     res.setMaxListeners(0).setHeaders(this.headers)
     res.socket.unref()
 
@@ -84,7 +84,7 @@ export class ServerSendEventsService {
         const parseMessage: Record<string, any> = JSON.parse(message)
         const result: Record<string, any> = parseMessage?.data
 
-        const accessToken: string = await this.redisService.get(`${result?.userId || result?.id}:token`)
+        const accessToken: string = await this.redisService.get(`${result?.userId || user?.id}:token`)
         const idToken: string = accessToken.substring(accessToken.length - 10, accessToken.length)
 
         const content: string = `id: ${idToken}\nevent: ${event}\ndata: ${JSON.stringify({ data: result })}\n\n`
