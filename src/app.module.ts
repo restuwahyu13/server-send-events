@@ -1,9 +1,17 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { ServerSendEvents } from './helpers/helper.sse';
-import { RedisService } from './libs/lib.redis';
+import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+
+import { EnvironmentService } from '~/configs/env.config'
+import { RedisService } from '~/libs/lib.redis'
+import { JoseService } from '~/libs/jose.lib'
+import { JwtService } from '~/libs/jwt.lib'
+import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
+import { AuthController } from '~/controllers/auth.controller'
+import { AuthService } from '~/services/auth.service'
+import { TransferController } from '~/controllers/transfer.controller'
+import { TransferService } from '~/services/transfer.service'
+import { NotificationController } from '~/controllers/notification.controller'
+import { NotificationService } from '~/services/notification.service'
 
 @Module({
   imports: [
@@ -14,8 +22,8 @@ import { RedisService } from './libs/lib.redis';
       cache: true,
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService, RedisService, ServerSendEvents],
-  exports: [RedisService, ServerSendEvents],
+  controllers: [AuthController, TransferController, NotificationController],
+  providers: [EnvironmentService, RedisService, JoseService, JwtService, ServerSendEventsService, AuthService, NotificationService, TransferService],
+  exports: [EnvironmentService, RedisService, JoseService, JwtService, ServerSendEventsService],
 })
 export class AppModule {}
