@@ -4,5 +4,5 @@
 
 ## Account Testing
 
-- email: mamat13@gmail.com || jamal13@gmail.com
-- password: @Qwerty12
+- **email:** `mamat13@gmail.com` | `jamal13@gmail.com`
+- **password:** `@Qwerty12`
