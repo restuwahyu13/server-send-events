@@ -33,13 +33,14 @@ function App() {
     console.log('[DEBUG DATA]', res?.data)
 
     const accessToken = localStorage.getItem('accessToken')
-    const idToken = accessToken.substring(accessToken?.length - 10, 15)
+    const idToken = accessToken.substring(accessToken?.length - 10, accessToken?.length)
 
     console.log('[DEBUG MATCH TOKEN]', event.id === idToken)
 
     if (res?.data && event.id === idToken) {
-      const parse = JSON.parse(res?.data)
-      setNotification(parse?.data?.message)
+      // const parse = JSON.parse(res?.data)
+      // setNotification(parse?.data?.message)
+      setNotification('Received from server')
     }
   }
 
