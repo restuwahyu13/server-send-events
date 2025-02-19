@@ -8,12 +8,10 @@ import { AppInterceptor } from '~/app.interceptor'
 import { AppModule } from '~/app.module'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { NestFactory } from '@nestjs/core'
-import compression from 'compression'
 import express from 'express'
 import helmet from 'helmet'
 import hpp from 'hpp'
 import nocache from 'nocache'
-import zlib from 'zlib'
 
 class Application {
   private app: NestExpressApplication
@@ -49,13 +47,6 @@ class Application {
     this.app.use(express.urlencoded({ limit: +process.env.INBOUND_SIZE_MAX, extended: true }))
     this.app.use(
       hpp({ checkBody: true, checkQuery: true, whitelist: ['questions', 'oldquestions'], checkBodyOnlyForContentType: 'application/json' }),
-    )
-    this.app.use(
-      compression({
-        strategy: zlib.constants.Z_RLE,
-        level: zlib.constants.Z_BEST_COMPRESSION,
-        memLevel: zlib.constants.Z_BEST_COMPRESSION,
-      }),
     )
   }
 
