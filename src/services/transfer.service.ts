@@ -1,9 +1,11 @@
 import { Injectable, HttpStatus as status } from '@nestjs/common'
 
 import { ApiResponse } from '~/interfaces/apiResponse.interface'
+import { ESseResponseType } from '~/interfaces/sseResponse.interface'
 import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
 import { TransferDTO } from '~/dtos/transfer.dto'
 import { apiResponse } from '~/helpers/helper.apiResponse'
+import { sseResponse } from '~/helpers/helper.sseResponse'
 import { userMocks } from '~/mocks/user.mock'
 
 @Injectable()
@@ -21,10 +23,17 @@ export class TransferService {
 
       const amount: string = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(body.amount)
 
-      this.serverSendEventsService.send('notification', {
-        userId: userMockReceiver.id,
-        message: `You have received balance from ${userMockSender.email} ${amount}`,
-      })
+      this.serverSendEventsService.send(
+        'notification',
+        sseResponse({
+          id: userMockReceiver.id,
+          type: ESseResponseType.INFO,
+          content: {
+            title: 'Transfer successfully',
+            description: `You have received balance from ${userMockSender.email} ${amount}`,
+          },
+        }),
+      )
 
       return apiResponse({ stat_code: status.OK, message: `Transfer money to ${userMockReceiver.email} successfully` })
     } catch (e: any) {

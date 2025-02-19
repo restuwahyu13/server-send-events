@@ -1,18 +1,27 @@
+import { Request, Response } from 'express'
+
 import { ApiResponse } from '~/interfaces/apiResponse.interface'
+import { AuthGuard } from '~/guards/auth.guard'
+import { EnvironmentService } from '~/configs/env.config'
 import { Injectable } from '@nestjs/common'
-import { Response } from 'express'
+import { JwtService } from '~/libs/jwt.lib'
 import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
-import { apiResponse } from '~/helpers/helper.apiResponse'
 
 @Injectable()
 export class NotificationService {
-  constructor(private serverSendEventsService: ServerSendEventsService) {}
+  constructor(
+    private envService: EnvironmentService,
+    private jwtService: JwtService,
+    private sseService: ServerSendEventsService,
+  ) {}
 
-  sendSpecificUser(res: Response, user: Record<string, any>): void | ApiResponse {
-    try {
-      this.serverSendEventsService.subscribeSpecific(res, user, 'notification')
-    } catch (e: any) {
-      throw apiResponse(e)
-    }
+  sendBroadcast(req: Request, res: Response): void | ApiResponse {
+    AuthGuard.canActivateManual(req, this.envService, this.jwtService, this.sseService)
+    this.sseService.subscribeBroadcast(res, 'notification')
+  }
+
+  sendSpecific(req: Request, res: Response, user: Record<string, any>): void | ApiResponse {
+    AuthGuard.canActivateManual(req, this.envService, this.jwtService, this.sseService)
+    this.sseService.subscribeSpecific(res, user, 'notification')
   }
 }

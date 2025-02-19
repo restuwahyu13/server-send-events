@@ -10,40 +10,53 @@ function App() {
   const [token, setToken] = useState(undefined)
 
   if (notification) {
-    toast.success(notification, {
-      position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'dark',
-      transition: Slide,
-    })
+    const message = notification?.content?.description || notification?.error
+
+    if (notification?.type === 'info') {
+      toast.success(message, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Slide,
+      })
+    } else if (notification?.type === 'error') {
+      toast.error(message, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Slide,
+      })
+    }
 
     setNotification(undefined)
   }
 
-  function onEvent(event) {
+  function onEvent(event, idToken) {
     const id = event.id
     console.log('[DEBUG ID]', id)
 
     const res = JSON.parse(event.data)
     console.log('[DEBUG DATA]', res?.data)
-
-    const accessToken = localStorage.getItem('accessToken')
-    const idToken = accessToken.substring(accessToken?.length - 10, accessToken?.length)
-
     console.log(`[DEBUG MATCH TOKEN]: ${idToken}`, event.id === idToken)
 
     if (res?.data && event.id === idToken) {
-      setNotification(res?.data?.message)
+      setNotification(res?.data)
     }
   }
 
   const fetchSourceStream = (accessToken) => {
-    fetchEventSource(`${url}/notification`, {
+    const idToken = token.substring(token?.length - 10, token?.length)
+    fetchEventSource(`${url}/notification/${idToken}`, {
       method: 'POST',
       headers: {
         'access-control-allow-origin': '*',
@@ -51,11 +64,11 @@ function App() {
         'content-type': 'text/event-stream',
         'cache-control': 'no-cache',
         'accept': 'text/event-stream',
-        // 'authorization': `Bearer ${accessToken}`,
+        'authorization': `Bearer ${accessToken}`,
       },
       keepalive: true,
       onmessage(event) {
-        onEvent(event)
+        onEvent(event, idToken)
       },
       onerror(err) {
         console.error('SSE event error', err)
@@ -93,11 +106,16 @@ function App() {
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken')
+
     if (accessToken) {
+      console.log('[DEBUG ACCESS TOKEN]', accessToken)
       setToken(accessToken)
-      fetchSourceStream(accessToken)
     }
-  }, [])
+
+    if (token) {
+      fetchSourceStream(token)
+    }
+  }, [token])
 
   return (
     <>
