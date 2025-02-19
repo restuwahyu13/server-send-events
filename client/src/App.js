@@ -118,10 +118,8 @@ function App() {
         const result = await response.json()
         console.log('[DEBUG LOGIN]', result)
 
-        if (result) {
-          localStorage.setItem('accessToken', result?.data?.accessToken)
-          setToken(result?.data?.accessToken)
-        }
+        localStorage.setItem('accessToken', result?.data?.accessToken)
+        setToken(result?.data?.accessToken)
       }
     } catch (e) {
       console.error('[ERROR LOGIN]', e)
