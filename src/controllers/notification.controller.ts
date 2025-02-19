@@ -4,7 +4,6 @@ import { User } from '~/decorators/user.decorator'
 import { ApiResponse } from '~/interfaces/apiResponse.interface'
 import { NotificationService } from '~/services/notification.service'
 
-// @UseGuards(AuthSSEGuard)
 @Controller()
 export class NotificationController {
   constructor(private notificationService: NotificationService) {}
