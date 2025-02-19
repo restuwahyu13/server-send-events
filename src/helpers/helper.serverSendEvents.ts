@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 
-import { RedisService } from '~/libs/lib.redis'
+import { RedisService } from '~/libs/redis.lib'
 import { Response } from 'express'
 import { randomUUID } from 'node:crypto'
 

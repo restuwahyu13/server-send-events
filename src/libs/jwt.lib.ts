@@ -1,14 +1,15 @@
-import crypto from 'node:crypto'
 import * as jose from 'jose'
-import moment from 'moment-timezone'
-import { Injectable } from '@nestjs/common'
 
-import { RedisService } from '~/libs/lib.redis'
-import { JoseService } from '~/libs/jose.lib'
-import { EnvironmentService } from '~/configs/env.config'
 import { ISecretMetadata, ISignatureMetadata } from '~/interfaces/jwt.interface'
-import { apiResponse } from '~/helpers/helper.apiResponse'
+
 import { Encryption } from '~/helpers/helper.encryption'
+import { EnvironmentService } from '~/configs/env.config'
+import { Injectable } from '@nestjs/common'
+import { JoseService } from '~/libs/jose.lib'
+import { RedisService } from '~/libs/redis.lib'
+import { apiResponse } from '~/helpers/helper.apiResponse'
+import crypto from 'node:crypto'
+import moment from 'moment-timezone'
 
 @Injectable()
 export class JwtService {

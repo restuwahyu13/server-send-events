@@ -1,17 +1,16 @@
-import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-
-import { EnvironmentService } from '~/configs/env.config'
-import { RedisService } from '~/libs/lib.redis'
-import { JoseService } from '~/libs/jose.lib'
-import { JwtService } from '~/libs/jwt.lib'
-import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
 import { AuthController } from '~/controllers/auth.controller'
 import { AuthService } from '~/services/auth.service'
-import { TransferController } from '~/controllers/transfer.controller'
-import { TransferService } from '~/services/transfer.service'
+import { ConfigModule } from '@nestjs/config'
+import { EnvironmentService } from '~/configs/env.config'
+import { JoseService } from '~/libs/jose.lib'
+import { JwtService } from '~/libs/jwt.lib'
+import { Module } from '@nestjs/common'
 import { NotificationController } from '~/controllers/notification.controller'
 import { NotificationService } from '~/services/notification.service'
+import { RedisService } from '~/libs/redis.lib'
+import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
+import { TransferController } from '~/controllers/transfer.controller'
+import { TransferService } from '~/services/transfer.service'
 
 @Module({
   imports: [

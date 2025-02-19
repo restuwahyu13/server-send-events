@@ -1,5 +1,7 @@
-import { HttpException, Injectable, Logger, HttpStatus as status } from '@nestjs/common'
 import { Callback, Redis } from 'ioredis'
+import { HttpException, Injectable, Logger, HttpStatus as status } from '@nestjs/common'
+
+import { EnvironmentService } from '~/configs/env.config'
 
 @Injectable()
 export class RedisService {
@@ -9,10 +11,10 @@ export class RedisService {
   private predis: Redis
   private sredis: Redis
 
-  constructor() {
-    this.redis = new Redis({ enableAutoPipelining: true })
-    this.predis = new Redis({ enableAutoPipelining: true, autoResubscribe: false })
-    this.sredis = new Redis({ enableAutoPipelining: true, autoResubscribe: false })
+  constructor(private envService: EnvironmentService) {
+    this.redis = new Redis(this.envService.REDIS_URL, { enableAutoPipelining: true })
+    this.predis = new Redis(this.envService.REDIS_URL, { enableAutoPipelining: true, autoResubscribe: false })
+    this.sredis = new Redis(this.envService.REDIS_URL, { enableAutoPipelining: true, autoResubscribe: false })
   }
 
   ttl(key: string): Promise<number> {
