@@ -6,7 +6,6 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 function App() {
   const url = 'http://localhost:4000'
   const [notification, setNotification] = useState(undefined)
-  const [sendMoney, setSendMoney] = useState(undefined)
   const [login, setLogin] = useState(undefined)
   const [token, setToken] = useState(undefined)
 
@@ -62,40 +61,6 @@ function App() {
         console.error('SSE event error', err)
       },
     })
-  }
-
-  const transferMoney = async () => {
-    try {
-      const accessToken = localStorage.getItem('accessToken')
-
-      if (accessToken) {
-        const sender = prompt('Masukan account pengirim ?')
-        const receiver = prompt('Masukan account penerima ?')
-        const amount = prompt('Masukan jumlah nominal ?')
-
-        setSendMoney({ sender, receiver, amount: +amount })
-
-        if (sendMoney) {
-          const response = await fetch(`${url}/v1/transfer/money`, {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(sendMoney),
-          })
-
-          const result = await response.json()
-          console.log('[DEBUG TRANSFER]', result)
-
-          if (result) {
-            fetchSourceStream()
-          }
-        }
-      }
-    } catch (e) {
-      console.error('[ERROR TRANSFER]', e)
-    }
   }
 
   const generateToken = async () => {
