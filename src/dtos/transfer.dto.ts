@@ -8,5 +8,5 @@ export class TransferDTO {
   receiver: string
 
   @IsNumber({ allowInfinity: false, allowNaN: false })
-  amount: string
+  amount: number
 }
