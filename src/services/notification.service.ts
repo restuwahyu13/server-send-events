@@ -1,9 +1,8 @@
+import { ApiResponse } from '~/interfaces/apiResponse.interface'
 import { Injectable } from '@nestjs/common'
 import { Response } from 'express'
-
-import { apiResponse } from '~/helpers/helper.apiResponse'
 import { ServerSendEventsService } from '~/helpers/helper.serverSendEvents'
-import { ApiResponse } from '~/interfaces/apiResponse.interface'
+import { apiResponse } from '~/helpers/helper.apiResponse'
 
 @Injectable()
 export class NotificationService {
@@ -11,7 +10,7 @@ export class NotificationService {
 
   sendSpecificUser(res: Response, user: Record<string, any>): void | ApiResponse {
     try {
-      this.serverSendEventsService.subscribe(res, user, 'notification')
+      this.serverSendEventsService.subscribeSpecific(res, user, 'notification')
     } catch (e: any) {
       throw apiResponse(e)
     }

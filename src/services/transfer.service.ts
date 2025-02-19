@@ -21,7 +21,7 @@ export class TransferService {
 
       const amount: string = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(body.amount)
 
-      this.serverSendEventsService.publish('notification', {
+      this.serverSendEventsService.send('notification', {
         userId: userMockReceiver.id,
         message: `You have received balance from ${userMockSender.email} ${amount}`,
       })
