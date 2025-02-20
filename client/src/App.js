@@ -41,22 +41,22 @@ function App() {
     setNotification(undefined)
   }
 
-  function onEvent(event, idToken) {
-    const id = event.id
-    console.log('[DEBUG ID]', id)
-
+  function onEvent(event, feTokenId) {
     const res = JSON.parse(event.data)
-    console.log('[DEBUG DATA]', res?.data)
-    console.log(`[DEBUG MATCH TOKEN]: ${idToken}`, event.id === idToken)
+    const beTokenId = res?.data?.metadata?.token
 
-    if (res?.data && event.id === idToken) {
+    console.log('[DEBUG DATA]', res?.data)
+    console.log(`[DEBUG MATCH TOKEN]: ${beTokenId} === ${feTokenId}`, beTokenId === feTokenId)
+
+    if (beTokenId === feTokenId) {
       setNotification(res?.data)
     }
   }
 
   const fetchSourceStream = (accessToken) => {
-    const idToken = token.substring(token?.length - 10, token?.length)
-    fetchEventSource(`${url}/notification/${idToken}`, {
+    const feTokenId = token.substring(token?.length - 10, token?.length)
+
+    fetchEventSource(`${url}/notification/${feTokenId}`, {
       method: 'POST',
       headers: {
         'access-control-allow-origin': '*',
@@ -68,7 +68,7 @@ function App() {
       },
       keepalive: true,
       onmessage(event) {
-        onEvent(event, idToken)
+        onEvent(event, feTokenId)
       },
       onerror(err) {
         console.error('SSE event error', err)

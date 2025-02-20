@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res } from '@nestjs/common'
+import { Controller, Param, Post, Req, Res } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { User } from '~/decorators/user.decorator'
 import { NotificationService } from '~/services/notification.service'
@@ -13,7 +13,7 @@ export class NotificationController {
   }
 
   @Post('/notification/:id')
-  sendSpecific(@Req() req: Request, @Res() res: Response, @User() user: Record<string, any>): void {
-    this.notificationService.sendSpecific(req, res, user)
+  sendSpecific(@Req() req: Request, @Res() res: Response, @User() user: Record<string, any>, @Param('id') id: string): void {
+    this.notificationService.sendSpecific(req, res, user, id)
   }
 }

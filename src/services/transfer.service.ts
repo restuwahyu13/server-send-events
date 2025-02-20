@@ -26,11 +26,13 @@ export class TransferService {
       this.serverSendEventsService.send(
         'notification',
         sseResponse({
-          id: userMockReceiver.id,
           type: ESseResponseType.INFO,
           content: {
             title: 'Transfer successfully',
             description: `You have received balance from ${userMockSender.email} ${amount}`,
+          },
+          metadata: {
+            user_id: userMockReceiver.id,
           },
         }),
       )

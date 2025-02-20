@@ -17,4 +17,5 @@ export interface SseResponse {
   content?: SseResponseContent
   error?: string
   timestamp?: Date
+  metadata?: Record<string, any>
 }

@@ -20,8 +20,8 @@ export class NotificationService {
     this.sseService.subscribeBroadcast(res, 'notification')
   }
 
-  sendSpecific(req: Request, res: Response, user: Record<string, any>): void | ApiResponse {
+  sendSpecific(req: Request, res: Response, user: Record<string, any>, id: string): void | ApiResponse {
     AuthGuard.canActivateManual(req, this.envService, this.jwtService, this.sseService)
-    this.sseService.subscribeSpecific(res, user, 'notification')
+    this.sseService.subscribeSpecific(res, user, id, 'notification')
   }
 }
